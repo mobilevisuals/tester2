@@ -1,6 +1,7 @@
 package com.example.productsdb;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -33,7 +34,9 @@ public class AppController {
     }
 
     @PostMapping("/save")
-    public String saveProduct(Product product, BindingResult result) {
+    public String saveProduct(Product product,
+                              BindingResult result)
+    {
         if (result.hasErrors())
             return "error";
         service.save(product);
@@ -41,7 +44,8 @@ public class AppController {
     }
 
    /* @RequestMapping("/edit/{id}")
-    public ModelAndView showEditProductPage(@PathVariable(name = "id") int id) {
+    public ModelAndView showEditProductPage
+    (@PathVariable(name = "id") int id) {
         ModelAndView mav = new ModelAndView("edit_product");
         Product product = service.get(id);
         mav.addObject("product", product);
@@ -50,14 +54,18 @@ public class AppController {
     }*/
 
     @RequestMapping("/edit/{id}")
-    public String showEditProductPage(@PathVariable(name = "id") int id,Model model) {
-        Product product = service.get(id);
-        model.addAttribute("product_to_edit", product);
+    public String showEditProductPage(@PathVariable(name = "id")
+                                                  int id,Model model)
+    {
+        Optional<Product> product = service.get(id);
+        model.addAttribute("product_to_edit", product.get());
         return "edit_product";
     }
 
     @RequestMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable(name = "id") int id) {
+    public String deleteProduct
+            (@PathVariable(name = "id") int id)
+    {
         service.delete(id);
         return "redirect:/";
     }

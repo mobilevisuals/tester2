@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -21,25 +22,21 @@ public class RController {
     }
 
     @GetMapping(value = "/product/{id}", produces = "application/json")
-    public Product getProductByID(@PathVariable int id) {
-        Product product = productService.get(id);
+    public Optional<Product> getProductByID(@PathVariable int id) {
+        Optional<Product> product = productService.get(id);
 
         Link link1 = linkTo(methodOn(RController.class).allProducts()).withRel("allproducts");
-      //  Link link2 = linkTo(methodOn(RController.class).deleteProduct(id)).withRel("delete_by_id");
-        /*Book res=null;
-        Link link1=linkTo(methodOn(BookController.class).deleteByID(id)).withRel("delete_by_id");
-        for(Book book:bookList)
-        {
-            if(book.getId()==id)
-                res=book;
+        Link link2 = linkTo(methodOn(RController.class).deleteProduct(id)).withRel("delete_by_id");
+        Link link3 = linkTo(methodOn(RController.class).addProduct(product.get())).withRel("add_product");
+
+        if(product.isPresent()) {
+            product.get().add(link1);
+            product.get().add(link2);
+            product.get().add(link3);
+            return product;
         }
-        res.add(link1);
-        Link link2=linkTo(methodOn(BookController.class).allBook()).withRel("all_books");
-        res.add(link2);
-        Link link3=linkTo(methodOn(BookController.class).addBook(res)).withRel("add_book");
-        res.add(link3);*/
-product.add(link1);
-        return product;
+        else
+            return null;
     }
 
     @RequestMapping(value = "/products",produces = "application/json")
@@ -48,10 +45,30 @@ product.add(link1);
         return productService.listAll();
     }
 
-    @DeleteMapping(value = "/delete/{id}", produces = "application/json")
-    public int deleteProduct(@PathVariable int id) {
-        productService.delete(id);
-        return id;
+    @RequestMapping(value = "/delete/{id}", produces = "application/json")
+    public Response deleteProduct(@PathVariable int id) {
+        Response response=new Response("Product added",false);
+        try {
+            productService.delete(id);
+        }
+        catch (Exception e)
+        { return response;}
+        response.setStatus(true);
+        return response;
+
+    }
+
+    @PostMapping("/product/add")
+    public Response addProduct(@RequestBody Product product)
+    {
+        Response response=new Response("Product added",false);
+        if((product.getId()!=0) &&(product.getName()!=null) ) {
+            productService.save(product);
+            response.setStatus(true);
+        }
+        else
+            response.setMessage("failed to add");
+        return response;
     }
 
 

@@ -1,6 +1,7 @@
 package com.example.productsdb;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,8 @@ public class ProductService {
 		repo.save(product);
 	}
 	
-	public Product get(long id) {
-		return repo.findById(id).get();
+	public Optional<Product> get(long id) {
+		return repo.findById(id);
 	}
 
 	@Transactional
